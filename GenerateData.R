@@ -1,6 +1,7 @@
 #Functions
+
 geno_calc <- function(NbInd,vecMAF){
-  #Allows to obtain the genotypes of NbInd individuals governed under a probability vecMaf.
+  # Allows to obtain the genotypes of NbInd individuals governed under a probability vecMaf.
   z1 <- rbinom(NbInd, 1, vecMAF)
   z2 <- rbinom(NbInd, 1, vecMAF)
   X <- z1 + z2
@@ -8,24 +9,26 @@ geno_calc <- function(NbInd,vecMAF){
 }
 
 maf_calc <- function(SNP) {
-  #Allows to calculate the MAF of a SNP
+  # Allows to calculate the MAF of a SNP
   freq_A <- (sum(SNP==0)*2+sum(SNP==1))/(2*length(SNP))
   MAF <- min(freq_A, 1-freq_A)
   return(MAF)
 }
 
 quantitative_association_test <- function(phenotype,SNP_geno){
+  # Allows to compute the pvalues of a linear model
   pval <- summary(lm(phenotype~SNP_geno))$coefficient[8]
   return(pval)
 }
 
 binary_association_test <- function(phenotype,SNP_geno){
+  # Allows to compute the pvalues of a logistic model
   pval <- summary(glm(phenotype~SNP_geno,family=binomial(link=logit)))$coefficient[8]
   return(pval)
 }
 
 generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBeta="reference", size_n=2000, size_m=8000, m1=50, R2=r2){
-  #Allows to generate pvalues and covariates in the case of independent data (without correlation between SNPs)
+  # Allows to generate pvalues and covariates in the case of independent data (without correlation between SNPs)
 
   reg_covariates<-list()
   reg_pvalues<-list()
@@ -59,7 +62,7 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
 
     ## Regarding p-values
     if(Design=="quantitative"){ # If quantitative design
-      R2=r2 # Percentage explaining the model
+      R2<-r2 # Percentage explaining the model
       ### Beta building
       if(ScenarioBeta=="reference"){
         beta <- as.matrix(c(rep(3,subset_m1_1),rep(2,subset_m1_2),rep(1,subset_m1_3), rep(0,m0)))
@@ -90,16 +93,16 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
       }
 
       # Choice of bêta0
-      list_ratio <- c(); i=1;
+      list_ratio <- c(); i<-1;
       possible_values_beta0<-seq(0,-50,-0.1)
       for (beta0 in possible_values_beta0) {
         eXB <- exp(beta0+matrix_X%*%beta)
         Y <- rbinom(size_n, 1, (eXB/ (1+eXB)) )
         Y <- as.factor(Y)
         list_ratio[i]<-c(prop.table(table(Y))[2])
-        i=i+1
+        i <- i+1
       }
-      beta0=possible_values_beta0[order(abs(list_ratio-0.5))[1]]
+      beta0 <- possible_values_beta0[order(abs(list_ratio-0.5))[1]]
       eXB <- exp(beta0+matrix_X%*%beta)
       Y <- rbinom(size_n, 1, (eXB/ (1+eXB)) ) # Computation of Y:
       Y <- as.factor(Y)
@@ -133,7 +136,7 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
   library(mvtnorm)
 
 
-  blsize=10
+  blsize <- 10
   nblock <- size_m/blsize
   mylist <- list()
   mysubmat <- matrix(vrho,blsize,blsize)
@@ -199,8 +202,8 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
 
     ## Regarding p-values
     if(Design=="quantitative"){ # If quantitative design
-      r2=R2 # Percentage explaining the model
-      beta[draw1]=3; beta[draw2]=2; beta[draw3]=1 # Beta for each group
+      r2 <- R2 # Percentage explaining the model
+      beta[draw1] <- 3; beta[draw2] <- 2; beta[draw3] <- 1 # Beta for each group
       beta <- as.matrix(unlist(beta)) # Final Beta vector
       ### Regarding p-values
       XB <- matrix_X %*% beta # Epsilon Matrix (quantitative)
@@ -209,19 +212,19 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
       Y <- XB + epsilon # Computation of Y (quantitative)
       pvalues <- apply(matrix_X, 2, quantitative_association_test,phenotype=Y) # Computation of Pj quantitative = Pvalues
     } else if(Design=="case_control"){ # If case_control design
-      beta[draw1]=log(1.8); beta[draw2]=log(1.5); beta[draw3]=log(1.3) # Beta for each group
+      beta[draw1] <- log(1.8); beta[draw2] <- log(1.5); beta[draw3] <- log(1.3) # Beta for each group
       beta <- as.matrix(unlist(beta)) # Final Beta vector
       # Choice of bêta0
-      list_ratio <- c(); i=1;
+      list_ratio <- c(); i <- 1;
       possible_values_beta0<-seq(0,-50,-0.1)
       for (beta0 in possible_values_beta0) {
         eXB <- exp(beta0+matrix_X%*%beta)
         Y <- rbinom(size_n, 1, (eXB/ (1+eXB)) )
         Y <- as.factor(Y)
         list_ratio[i]<-c(prop.table(table(Y))[2])
-        i=i+1
+        i <- i+1
       }
-      beta0=possible_values_beta0[order(abs(list_ratio-0.5))[1]]
+      beta0 <- possible_values_beta0[order(abs(list_ratio-0.5))[1]]
       eXB <- exp(beta0+matrix_X%*%beta)
       Y <- rbinom(size_n, 1, (eXB/ (1+eXB)) ) # Computation of Y:
       Y <- as.factor(Y)
@@ -248,35 +251,35 @@ correlationsofSNPs<-function(List_SNPs_Drawn, CorrMatrix, Threshold){
   return(Corr_SNPs)
 }
 
-##Parameters
-nb_iteration=1
-size_n=2000
-r2=0.2
-path_out=c("/home/lobry/Documents/Nouveau2021/Test/")
+#Parameters
+nb_iteration <- 1
+size_n <- 2000
+r2 <- 0.2
+path_out <- c("/home/lobry/Documents/Nouveau2021/Test/")
 
-##Main
+#Main
 for (Case in c("independent","correlation")) {
   if(Case==c("independent")){
-    vrho=0
-    blsize=0
+    vrho <- 0
+    blsize <- 0
     for (scenario in c("reference","inverse","constant")) {
-      for (design in c("quantitative","case_control")) {#
-        for (size_m in c(8000,14000,20000)) {#
-          for(m1 in c(25,50,100,150)){#
+      for (design in c("quantitative","case_control")) {
+        for (size_m in c(8000,14000,20000)) {
+          for(m1 in c(25,50,100,150)){
             Config <- generate_ind_data(nb_iteration=nb_iteration,Design=design,ScenarioBeta=scenario,size_n=size_n,size_m=size_m,m1=m1,R2=r2)
             reg_pvalues <- Config[[1]]
             reg_covariates <- Config[[2]]
             if (design=="quantitative") {
-              if(scenario=="reference"){quantitative_beta=c("B3210.RData")}
-              if(scenario=="inverse"){quantitative_beta=c("B1230.RData")}
-              if(scenario=="constant"){quantitative_beta=c("B2220.RData")}
+              if(scenario=="reference"){quantitative_beta <- c("B3210.RData")}
+              if(scenario=="inverse"){quantitative_beta <- c("B1230.RData")}
+              if(scenario=="constant"){quantitative_beta <- c("B2220.RData")}
 
               file_out <- paste("LineR","n",size_n,"m",size_m,"m1",m1,"rho",vrho,"tb",blsize,"r2",r2,quantitative_beta,sep="_")
             }
             if(design=="case_control"){
-              if(scenario=="reference"){binary_beta=c("B_1.8_1.5_1.3_1.RData")}
-              if(scenario=="inverse"){binary_beta=c("B_1.3_1.5_1.8_1.RData")}
-              if(scenario=="constant"){binary_beta=c("B_1.5_1.5_1.5_1.RData")}
+              if(scenario=="reference"){binary_beta <- c("B_1.8_1.5_1.3_1.RData")}
+              if(scenario=="inverse"){binary_beta <- c("B_1.3_1.5_1.8_1.RData")}
+              if(scenario=="constant"){binary_beta <- c("B_1.5_1.5_1.5_1.RData")}
 
               file_out <- paste("Logit","n",size_n,"m",size_m,"m1",m1,"rho",vrho,"tb",blsize,binary_beta,sep="_")
             }
@@ -288,10 +291,10 @@ for (Case in c("independent","correlation")) {
     }
   }
   if(Case==c("correlation")){
-    size_m=8000
-    m1=50
-    blsize=10
-    for (design in c("case_control","quantitative")) {#,
+    size_m <- 8000
+    m1 <- 50
+    blsize <- 10
+    for (design in c("case_control","quantitative")) {
       for (vrho in c(0.10,0.20,0.35,0.5,0.75)) {
           Config <- generate_corr_data(nb_iteration=nb_iteration,Design=design,
                                                size_n=size_n,size_m=size_m,m1=m1,blsize=blsize,vrho=vrho,R2=r2)
