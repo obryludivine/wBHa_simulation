@@ -1,5 +1,6 @@
 #Functions
-appli_procedures_ind_simu <- function(N_iteration, pvalues_list, covariates_list, alpha, m1, subset_m1_1, subset_m1_2, subset_m1_3, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3){
+appli_procedures_ind_simu <- function(N_iteration, pvalues_list, covariates_list, alpha, m1, subset_m1_1, subset_m1_2, subset_m1_3,
+                                      limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3){
   # Allows to apply the procedures on a independent simulation dataset (with 500 iterations) and to compute the FDR and the powers (global and subgroup)
 
   all_FDP <- c()
@@ -53,7 +54,7 @@ appli_procedures_ind_simu <- function(N_iteration, pvalues_list, covariates_list
     # Results
     all_FDP <- cbind(all_FDP, rbind(res_BH[[1]], res_wBH[[1]], res_wBHa[[1]], res_IHW[[1]], res_qvalue[[1]], res_swfdr[[1]], res_fdrreg[[1]], res_camt[[1]]))
     all_Power <- cbind(all_Power, rbind(res_BH[[2]], res_wBH[[2]], res_wBHa[[2]], res_IHW[[2]],  res_qvalue[[2]], res_swfdr[[2]], res_fdrreg[[2]], res_camt[[2]]))
-    all_SubPower <- rbind(all_SubPower, rbind(res_BH[[3]], res_wBH[[3]], res_wBHa[[3]], res_IHW[[3]],  res_qvalue[[3]], res_swfdr[[3]], res_fdrreg[[3]], res_camt[[3]]))
+    all_SubPower <- rbind(all_SubPower,rbind(res_BH[[3]],res_wBH[[3]],res_wBHa[[3]],res_IHW[[3]],res_qvalue[[3]],res_swfdr[[3]],res_fdrreg[[3]],res_camt[[3]]))
   }
 
   # N/A or 0 management
@@ -96,7 +97,8 @@ power_FDR_calc_ind_simu <- function(rejects_vect, m1, subset_m1_1, subset_m1_2, 
 
 }
 
-appli_procedures_corr_simu <- function(N_iteration, pvalues_list, covariates_list, sNPs_Drawn_Corr_list, corr_draw_list, alpha, m1, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, size_m){
+appli_procedures_corr_simu <- function(N_iteration, pvalues_list, covariates_list, sNPs_Drawn_Corr_list, corr_draw_list, alpha, m1,
+                                       limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, size_m){
   # Allows to apply the procedures on a correlated simulated dataset (with 500 iterations) and to compute the FDR and the powers (global and subgroup)
   all_FDP <- c()
   all_Power <- c()
@@ -158,7 +160,7 @@ appli_procedures_corr_simu <- function(N_iteration, pvalues_list, covariates_lis
     # Results
     all_FDP <- cbind(all_FDP, rbind(res_BH[[1]], res_wBH[[1]], res_wBHa[[1]], res_IHW[[1]], res_qvalue[[1]], res_swfdr[[1]], res_fdrreg[[1]], res_camt[[1]]))
     all_Power <- cbind(all_Power, rbind(res_BH[[2]], res_wBH[[2]], res_wBHa[[2]], res_IHW[[2]],  res_qvalue[[2]], res_swfdr[[2]], res_fdrreg[[2]], res_camt[[2]]))
-    all_SubPower <- rbind(all_SubPower, rbind(res_BH[[3]], res_wBH[[3]], res_wBHa[[3]], res_IHW[[3]],  res_qvalue[[3]], res_swfdr[[3]], res_fdrreg[[3]], res_camt[[3]]))
+    all_SubPower <- rbind(all_SubPower,rbind(res_BH[[3]],res_wBH[[3]],res_wBHa[[3]],res_IHW[[3]],res_qvalue[[3]],res_swfdr[[3]],res_fdrreg[[3]],res_camt[[3]]))
   }
 
   # N/A or 0 management
@@ -189,7 +191,8 @@ appli_procedures_corr_simu <- function(N_iteration, pvalues_list, covariates_lis
   res <- list(res_FDR_power, res_Subpower)
   return(res)
 }
-power_FDR_calc_corr_simu <- function(rejects_vect, list_SNPs_Drawn_Correlated, Matrix_correlation_draw, m1, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, m){
+power_FDR_calc_corr_simu <- function(rejects_vect, list_SNPs_Drawn_Correlated, Matrix_correlation_draw, m1,
+                                     limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, m){
   # Allows to compute the FDP and Powers in correlation simulation data
   R <- length(rejects_vect)
   V <- length(rejects_vect[-which(rejects_vect%in%unlist(list_SNPs_Drawn_Correlated))])
@@ -260,7 +263,8 @@ for (Case in c("independent","correlation")) {
               if(file.exists(paste(path_in, linear_file_in, sep=""))){
                 load(paste(path_in, linear_file_in, sep=""))
 
-                results <- appli_procedures_ind_simu(nb_iteration, reg_pvalues, reg_covariates, alpha, m1, subset_m1_1, subset_m1_2, subset_m1_3, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3)
+                results <- appli_procedures_ind_simu(nb_iteration, reg_pvalues, reg_covariates, alpha, m1, subset_m1_1, subset_m1_2,
+                                                     subset_m1_3, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3)
                 res_FDR_power <- results[[1]]
                 res_Subpower <- results[[2]]
 
@@ -277,7 +281,8 @@ for (Case in c("independent","correlation")) {
               if(file.exists(paste(path_in, logit_file_in, sep=""))){
                 load(paste(path_in, logit_file_in, sep=""))
 
-                results <- appli_procedures_ind_simu(nb_iteration, reg_pvalues, reg_covariates, alpha, m1, subset_m1_1, subset_m1_2, subset_m1_3, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3)
+                results <- appli_procedures_ind_simu(nb_iteration, reg_pvalues, reg_covariates, alpha, m1, subset_m1_1, subset_m1_2,
+                                                     subset_m1_3, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3)
                 res_FDR_power <- results[[1]]
                 res_Subpower <- results[[2]]
 
@@ -305,7 +310,8 @@ for (Case in c("independent","correlation")) {
           if(file.exists(paste(path_in, linear_file_in, sep=""))){
             load(paste(path_in, linear_file_in, sep=""))
 
-            results <- appli_procedures_corr_simu(nb_iteration, reg_pvalues, reg_covariates, reg_SNPs_Drawn_Correlated, reg_correlation_draw, alpha, m1, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, size_m)
+            results <- appli_procedures_corr_simu(nb_iteration, reg_pvalues, reg_covariates, reg_SNPs_Drawn_Correlated, reg_correlation_draw,
+                                                  alpha, m1, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, size_m)
             res_FDR_power <- results[[1]]
             res_Subpower <- results[[2]]
 
@@ -319,7 +325,8 @@ for (Case in c("independent","correlation")) {
           if(file.exists(paste(path_in, logit_file_in, sep=""))){
             load(paste(path_in, logit_file_in, sep=""))
 
-            results <- appli_procedures_corr_simu(nb_iteration, reg_pvalues, reg_covariates, reg_SNPs_Drawn_Correlated, reg_correlation_draw, alpha, m1, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, size_m)
+            results <- appli_procedures_corr_simu(nb_iteration, reg_pvalues, reg_covariates, reg_SNPs_Drawn_Correlated, reg_correlation_draw,
+                                                  alpha, m1, limit_subset_m1_1, limit_subset_m1_2, limit_subset_m1_3, size_m)
             res_FDR_power <- results[[1]]
             res_Subpower <- results[[2]]
 
