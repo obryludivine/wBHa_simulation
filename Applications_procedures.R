@@ -53,7 +53,7 @@ appli_procedures_ind_simu <- function(N_iteration, pvalues_list, covariates_list
 
     # Results
     all_FDP <- cbind(all_FDP, rbind(res_BH[[1]], res_wBH[[1]], res_wBHa[[1]], res_IHW[[1]], res_qvalue[[1]], res_swfdr[[1]], res_fdrreg[[1]], res_camt[[1]]))
-    all_Power <- cbind(all_Power, rbind(res_BH[[2]], res_wBH[[2]], res_wBHa[[2]], res_IHW[[2]],  res_qvalue[[2]], res_swfdr[[2]], res_fdrreg[[2]], res_camt[[2]]))
+    all_Power <- cbind(all_Power, rbind(res_BH[[2]],res_wBH[[2]],res_wBHa[[2]],res_IHW[[2]], res_qvalue[[2]],res_swfdr[[2]],res_fdrreg[[2]],res_camt[[2]]))
     all_SubPower <- rbind(all_SubPower,rbind(res_BH[[3]],res_wBH[[3]],res_wBHa[[3]],res_IHW[[3]],res_qvalue[[3]],res_swfdr[[3]],res_fdrreg[[3]],res_camt[[3]]))
   }
 
@@ -159,7 +159,7 @@ appli_procedures_corr_simu <- function(N_iteration, pvalues_list, covariates_lis
 
     # Results
     all_FDP <- cbind(all_FDP, rbind(res_BH[[1]], res_wBH[[1]], res_wBHa[[1]], res_IHW[[1]], res_qvalue[[1]], res_swfdr[[1]], res_fdrreg[[1]], res_camt[[1]]))
-    all_Power <- cbind(all_Power, rbind(res_BH[[2]], res_wBH[[2]], res_wBHa[[2]], res_IHW[[2]],  res_qvalue[[2]], res_swfdr[[2]], res_fdrreg[[2]], res_camt[[2]]))
+    all_Power <- cbind(all_Power, rbind(res_BH[[2]],res_wBH[[2]],res_wBHa[[2]],res_IHW[[2]],res_qvalue[[2]],res_swfdr[[2]],res_fdrreg[[2]],res_camt[[2]]))
     all_SubPower <- rbind(all_SubPower,rbind(res_BH[[3]],res_wBH[[3]],res_wBHa[[3]],res_IHW[[3]],res_qvalue[[3]],res_swfdr[[3]],res_fdrreg[[3]],res_camt[[3]]))
   }
 
