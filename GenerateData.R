@@ -16,13 +16,13 @@ maf_calc <- function(SNP) {
 }
 
 quantitative_association_test <- function(phenotype,SNP_geno){
-  # Allows to compute the pvalues of a linear model
+  # Allows to compute the pvalues from a linear model
   pval <- summary(lm(phenotype~SNP_geno))$coefficient[8]
   return(pval)
 }
 
 binary_association_test <- function(phenotype,SNP_geno){
-  # Allows to compute the pvalues of a logistic model
+  # Allows to compute the pvalues from a logistic model
   pval <- summary(glm(phenotype~SNP_geno,family=binomial(link=logit)))$coefficient[8]
   return(pval)
 }
@@ -42,20 +42,20 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
     # size_m: Nb of SNPs
     # m1: Nb of causal SNPs
     m0<-size_m-m1 #  m0: Nb of non causal SNPs
-    subset_m1_1<-m1%/%3 # Nb of hypotheses in subgroup 1 of the covariable
-    subset_m1_2<-m1%/%3 # Nb of hypotheses in subgroup 2 of the covariable
-    subset_m1_3<-(m1%%3)+(m1%/%3) # Nb of hypotheses in subgroup 3 of the covariable
+    subset_m1_1<-m1%/%3 # Nb of hypotheses in subgroup 1
+    subset_m1_2<-m1%/%3 # Nb of hypotheses in subgroup 2
+    subset_m1_3<-(m1%%3)+(m1%/%3) # Nb of hypotheses in subgroup 3
     ## Regarding covariables
     theoretical_maf_m0 <- runif(m0, 0.05, 0.5)
     theoretical_maf_subset_m1_1 <- runif(subset_m1_1,0.05,0.15)
     theoretical_maf_subset_m1_2 <- runif(subset_m1_2,0.15,0.25)
     theoretical_maf_subset_m1_3 <- runif(subset_m1_3,0.3,0.4)
 
+    ## Regarding genotypes
     geno_matrix_m0 <- apply(as.matrix(theoretical_maf_m0), 1, geno_calc,NbInd=size_n)
     geno_matrix_subset_m1_1 <- apply(as.matrix(theoretical_maf_subset_m1_1), 1, geno_calc,NbInd=size_n)
     geno_matrix_subset_m1_2 <- apply(as.matrix(theoretical_maf_subset_m1_2), 1, geno_calc,NbInd=size_n)
     geno_matrix_subset_m1_3 <- apply(as.matrix(theoretical_maf_subset_m1_3), 1, geno_calc,NbInd=size_n)
-
     matrix_X <- cbind(geno_matrix_subset_m1_1,geno_matrix_subset_m1_2,geno_matrix_subset_m1_3,geno_matrix_m0)
 
     covariates <- apply(matrix_X, 2, maf_calc) # Computation of the estimated MAF = covariates
@@ -79,9 +79,9 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
       sigma2 <- ( (r2-1) * sum((XB-mean(XB))^2) ) / ( r2*(2-size_n) )
       epsilon <- as.matrix(rnorm(size_n, mean=0, sd=sqrt(sigma2) ))
       Y <- XB + epsilon # Computation of Y (quantitative)
-      pvalues <- apply(matrix_X, 2, quantitative_association_test,phenotype=Y) # Computation of Pj quantitative = Pvalues
+      pvalues <- apply(matrix_X, 2, quantitative_association_test,phenotype=Y) # Computation of quantitative Pj = Pvalues
     } else if(Design=="case_control"){ # If case_control design
-      #Beta building
+      ### Beta building
       if(ScenarioBeta=="reference"){
         beta <- as.matrix(c(rep(log(1.8),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.3),subset_m1_3), rep(log(1),m0)))
       }
@@ -92,7 +92,7 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
         beta <- as.matrix(c(rep(log(1.5),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.5),subset_m1_3), rep(log(1),m0)))
       }
 
-      # Choice of bêta0
+      ### Choice of bêta0
       list_ratio <- c(); i<-1;
       possible_values_beta0<-seq(0,-50,-0.1)
       for (beta0 in possible_values_beta0) {
@@ -106,7 +106,7 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
       eXB <- exp(beta0+matrix_X%*%beta)
       Y <- rbinom(size_n, 1, (eXB/ (1+eXB)) ) # Computation of Y:
       Y <- as.factor(Y)
-      pvalues <- apply(matrix_X, 2, binary_association_test,phenotype=Y) # Computation of Pj case_control = Pvalues
+      pvalues <- apply(matrix_X, 2, binary_association_test,phenotype=Y) # Computation of case_control Pj = Pvalues
     }
 
     reg_covariates[[iteration]]<-covariates
@@ -117,7 +117,7 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
 }
 
 discretise_geno <- function(SNP){
-  #Allows to discretize the values according to the Hardy-Weinberg equation
+  # Allows to discretize the values according to the Hardy-Weinberg equation
   MAF<-SNP[1]
   genotype<-SNP[-1]
   qp2<-quantile(genotype, probs = MAF^2)
@@ -157,9 +157,9 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
     # size_m: Nb of SNPs
     # m1: Nb of causal SNPs
     m0<-size_m-m1 #  m0: Nb of non causal SNPs
-    subset_m1_1<-m1%/%3 # Nb of hypotheses in subgroup 1 of the covariable
-    subset_m1_2<-m1%/%3 # Nb of hypotheses in subgroup 2 of the covariable
-    subset_m1_3<-(m1%%3)+(m1%/%3) # Nb of hypotheses in subgroup 3 of the covariable
+    subset_m1_1<-m1%/%3 # Nb of hypotheses in subgroup 1
+    subset_m1_2<-m1%/%3 # Nb of hypotheses in subgroup 2
+    subset_m1_3<-(m1%%3)+(m1%/%3) # Nb of hypotheses in subgroup 3
 
     ## Regarding covariables
     theoretical_maf_m0 <- runif(m0, 0.05, 0.5)
@@ -210,11 +210,11 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
       sigma2 <- ( (r2-1) * sum((XB-mean(XB))^2) ) / ( r2*(2-size_n) )
       epsilon <- as.matrix(rnorm(size_n, mean=0, sd=sqrt(sigma2) ))
       Y <- XB + epsilon # Computation of Y (quantitative)
-      pvalues <- apply(matrix_X, 2, quantitative_association_test,phenotype=Y) # Computation of Pj quantitative = Pvalues
+      pvalues <- apply(matrix_X, 2, quantitative_association_test,phenotype=Y) # Computation of quantitative Pj = Pvalues
     } else if(Design=="case_control"){ # If case_control design
       beta[draw1] <- log(1.8); beta[draw2] <- log(1.5); beta[draw3] <- log(1.3) # Beta for each group
       beta <- as.matrix(unlist(beta)) # Final Beta vector
-      # Choice of bêta0
+      ### Choice of bêta0
       list_ratio <- c(); i <- 1;
       possible_values_beta0<-seq(0,-50,-0.1)
       for (beta0 in possible_values_beta0) {
@@ -228,14 +228,14 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
       eXB <- exp(beta0+matrix_X%*%beta)
       Y <- rbinom(size_n, 1, (eXB/ (1+eXB)) ) # Computation of Y:
       Y <- as.factor(Y)
-      pvalues <- apply(matrix_X, 2, binary_association_test,phenotype=Y) # Computation of Pj case_control = Pvalues
+      pvalues <- apply(matrix_X, 2, binary_association_test,phenotype=Y) # Computation of case_control Pj = Pvalues
     }
 
     # How to define the True Positives (TP) ?
     ## Define the correlation matrix
     mcor<-as.data.frame(abs(cor(matrix_X,matrix_X)))
     correlation_draw[[iteration]]<-subset(mcor,select = c(draw1,draw2,draw3))
-    ## Define the list of SNPs considered as TP with a threshold of 0.8
+    ## Define the list of drawn correlated SNPs
     List_SNPs_Drawn_Correlated[[iteration]] <- lapply(draw,correlationsofSNPs,
                                                       CorrMatrix=mcor, Threshold=(vrho-0.05))
     reg_covariates[[iteration]]<-covariates
@@ -245,9 +245,9 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", size_n=2
   return(list(reg_pvalues, reg_covariates, List_SNPs_Drawn_Correlated,correlation_draw))
 }
 
-correlationsofSNPs<-function(List_SNPs_Drawn, CorrMatrix, Threshold){
+correlationsofSNPs<-function(List_Drawn_SNPs, CorrMatrix, Threshold){
   # Allows you to select the correlated SNPs with the drawn SNPs
-  Corr_SNPs<-which(CorrMatrix[,List_SNPs_Drawn]>Threshold)
+  Corr_SNPs<-which(CorrMatrix[,List_Drawn_SNPs]>Threshold)
   return(Corr_SNPs)
 }
 
