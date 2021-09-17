@@ -19,10 +19,13 @@ library(swfdr)
 library(FDRreg)
 library(CAMT)
 library(wBHa)
+library(UpSetR)
+library(venn)
+library(RColorBrewer)
 ```
 
 
-```{r Application}
+```{r Application, fig.align='center'}
 data("GSE90102_01")
 
 # Parameters
@@ -80,41 +83,38 @@ rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, qvalue=rej_
 ## Graphs
 
 ### Histogram of rejects
-```{r Histogram_rejects, fig.align="center"}
+```{r Histogram_rejects, fig.align='center'}
 rej_tab <- data.frame(Procedure=c("BH", "wBH", "wBHa", "IHW", "qvalue", "swfdr", "FDRreg", "CAMT"), 
                       Power=unlist(lapply(rej_list, length)))
 
 rej_histogram <- ggplot(data=rej_tab, aes(x=Procedure, y=Power, fill=Procedure)) + 
   geom_bar(stat="identity") + 
   scale_fill_manual(values=c("#A6CEE3","#1F78B4","#7570B3","#1B9E77","#DADAEB","#D9D9D9","#E69F00","#E31A1C")) + 
-  geom_text(aes(label=round(Power,digits=1)), position=position_stack(0.5), color="white", fontface=c("bold"), size=10) + 
-  theme(axis.title=element_text(size=23), axis.text=element_text(size=21), legend.title=element_text(size=25), legend.text=element_text(size=23), panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
+  geom_text(aes(label=round(Power,digits=1)), position=position_stack(0.5), color="white", fontface=c("bold")) + 
+  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), 
+        panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), 
+        panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
 rej_histogram
 ```
 
 ### UpsetR graph
-```{r UpsetR}
-library("UpSetR")
+```{r UpsetR, fig.align='center'}
 UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP", sets.x.label="Nb of rejections", 
-                      nsets=8, text.scale=2)
+                      nsets=8)
 UpsetR_graph
 ```
 
 ### Venn diagram
-```{r Venn}
-library("venn")
+```{r Venn, fig.align='center'}
 # reduction of the number of groups: 8 to 6
 rej_list$qvalue==rej_list$BH
 rej_list$swfdr==rej_list$BH
 rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
-venn_diagram <- venn(rej_list2, ilcs=1.5, sncs=1.5)
+venn_diagram <- venn(rej_list2)
 ```
 
 ### Histogram of (causal) subgroups 
-```{r Histogram_subgoups }
-library("RColorBrewer")
-
-
+```{r Histogram_subgoups, fig.align='center'}
 calc_proportion_subgroup <- function(rej_vect){
   # Allows to compute the proportion of causal SNPs in each subgroup
   rares1 <- length(which((covariates[rej_vect]<0.05)==T))
@@ -141,7 +141,9 @@ subgroup_hist <- ggplot(data=prop_subgroup_tab, aes(x=Procedure, y=Proportion, f
   geom_bar(stat="identity") + 
   scale_fill_brewer(palette="Blues") +
   labs(y="Proportion of rejected SNPs") +
-  theme(axis.text=element_text(size=15), axis.title=element_text(size=23), legend.title=element_text(size=15), legend.text=element_text(size=15), panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
+  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), 
+        panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), 
+        panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
 
 subgroup_hist
 ```
