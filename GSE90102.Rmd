@@ -10,7 +10,7 @@ output:
 
 ## Application of procedures
 
-```{r Application}
+```{r, echo=FALSE}
 set.seed(123)
 # Packages
 library(IHW)
@@ -19,7 +19,10 @@ library(swfdr)
 library(FDRreg)
 library(CAMT)
 library(wBHa)
+```
 
+
+```{r Application}
 data("GSE90102_01")
 
 # Parameters
@@ -70,14 +73,16 @@ res_CAMT <- camt.fdr(pvals=pvalues,pi0.var=covariates)
 pval_CAMT <- res_CAMT$fdr
 rej_CAMT <- which(c(pval_CAMT<alpha))
 
-rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, qvalue=rej_qvalue, swfdr=rej_swfdr, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
+rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, qvalue=rej_qvalue, swfdr=rej_swfdr, 
+                 FDRreg=rej_FDRreg, CAMT=rej_CAMT)
 ```
 
 ## Graphs
 
 ### Histogram of rejects
-```{r Histogram_rejects}
-rej_tab <- data.frame(Procedure=c("BH", "wBH", "wBHa", "IHW", "qvalue", "swfdr", "FDRreg", "CAMT"), Power=unlist(lapply(rej_list, length)))
+```{r Histogram_rejects, fig.align="center"}
+rej_tab <- data.frame(Procedure=c("BH", "wBH", "wBHa", "IHW", "qvalue", "swfdr", "FDRreg", "CAMT"), 
+                      Power=unlist(lapply(rej_list, length)))
 
 rej_histogram <- ggplot(data=rej_tab, aes(x=Procedure, y=Power, fill=Procedure)) + 
   geom_bar(stat="identity") + 
@@ -90,7 +95,8 @@ rej_histogram
 ### UpsetR graph
 ```{r UpsetR}
 library("UpSetR")
-UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP", sets.x.label="Nb of rejections", nsets=8, text.scale=2)
+UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP", sets.x.label="Nb of rejections", 
+                      nsets=8, text.scale=2)
 UpsetR_graph
 ```
 
@@ -121,7 +127,11 @@ calc_proportion_subgroup <- function(rej_vect){
   return(prop)
 }
 
-prop_subgroup_tab <- as.data.frame(cbind(c(rep("BH.qvalue.swfdr",5), rep("wBH",5), rep("wBHa",5), rep("IHW",5), rep("FDRreg",5), rep("CAMT",5)), c("5.Rare (MAF<0.05)", "4.Rare (0.05<MAF<0.1)", "3.Rare (0.1<MAF<0.15)", "2.Medium (0.15<MAF<0.3)", "1.Frequent (0.3<MAF)"), unlist(lapply(rej_list2,calc_proportion_subgroup))))
+prop_subgroup_tab <- as.data.frame(cbind(c(rep("BH.qvalue.swfdr",5), rep("wBH",5), rep("wBHa",5), rep("IHW",5),
+                                           rep("FDRreg",5), rep("CAMT",5)),c("5.Rare (MAF<0.05)", "4.Rare (0.05<MAF<0.1)",
+                                                                             "3.Rare (0.1<MAF<0.15)", "2.Medium (0.15<MAF<0.3)", 
+                                                                             "1.Frequent (0.3<MAF)"), 
+                                         unlist(lapply(rej_list2,calc_proportion_subgroup))))
 colnames(prop_subgroup_tab) <- c("Procedure", "Subgroups", "Proportion")
 prop_subgroup_tab$Proportion <- as.numeric(prop_subgroup_tab$Proportion)
 
@@ -150,18 +160,14 @@ search_rank <- function(pval_vect,alpha=0.05){
   pval_rank_tab_order <- pval_rank_tab[order(pval_rank_tab$pvalues),]
   pval_rank_tab_order <- cbind(pval_rank_tab_order, c(1:length(pval_vect)))
   pval_rank_tab_order_interest <- pval_rank_tab_order[c("565881", "325191", "561177"),] 
-  pval_rank_tab_order_interest <- data.frame(SNP=c("rs12494894", "rs72622838", "rs2238823"), Rank=pval_rank_tab_order_interest[,3], Threshold=length(which((pval_vect<alpha))))
+  pval_rank_tab_order_interest <- data.frame(SNP=c("rs12494894", "rs72622838", "rs2238823"), 
+                                             Rank=pval_rank_tab_order_interest[,3], 
+                                             Threshold=length(which((pval_vect<alpha))))
   return(pval_rank_tab_order_interest)
 }
 
-search_rank(pval_BH) #36,40,44 sur 43 rejets
-search_rank(pval_CAMT) #73,712,103 sur 111 rejets
-search_rank(pval_FDRreg) #36,41,43 sur 49 rejets
-search_rank(pval_IHW) #92,426,147 sur 109 rejets
-search_rank(pval_qvalue) #36,40,44 sur 43 rejets
-search_rank(pval_swfdr) #36,40,44 sur 43 rejets 
-search_rank(pval_wBH) #66,117,96 sur 102 rejets
-search_rank(pval_wBHa) #175,721,284 sur 102 rejets
+lapply(list(BH=pval_BH,CAMT=pval_CAMT,FDRreg=pval_FDRreg,IHW=pval_IHW,qvalue=pval_qvalue,swfdr=pval_swfdr,
+            wBH=pval_wBH,wBHa=pval_wBHa), search_rank)
 ```
 
 
