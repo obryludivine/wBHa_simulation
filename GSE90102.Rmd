@@ -10,7 +10,7 @@ output:
 
 ## Application of procedures
 
-```{r, echo=FALSE}
+```{r, echo=FALSE,include=FALSE}
 set.seed(123)
 # Packages
 library(IHW)
