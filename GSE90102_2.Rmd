@@ -19,6 +19,9 @@ library(swfdr)
 library(FDRreg)
 library(CAMT)
 library(wBHa)
+library(UpSetR)
+library(venn)
+library(RColorBrewer)
 ```
 
 
@@ -88,13 +91,14 @@ rej_histogram <- ggplot(data=rej_tab, aes(x=Procedure, y=Power, fill=Procedure))
   geom_bar(stat="identity") + 
   scale_fill_manual(values=c("#A6CEE3","#1F78B4","#7570B3","#1B9E77","#DADAEB","#D9D9D9","#E69F00","#E31A1C")) + 
   geom_text(aes(label=round(Power,digits=1)), position=position_stack(0.5), color="white", fontface=c("bold")) + 
-  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
+  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), 
+        panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), 
+        panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
 rej_histogram
 ```
 
 ### UpsetR graph
 ```{r UpsetR}
-library("UpSetR")
 UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP", sets.x.label="Nb of rejections", 
                       nsets=8)
 UpsetR_graph
@@ -102,19 +106,15 @@ UpsetR_graph
 
 ### Venn diagram
 ```{r Venn}
-library("venn")
 # reduction of the number of groups: 8 to 6
 rej_list$qvalue==rej_list$BH
 rej_list$swfdr==rej_list$BH
 rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
-venn_diagram <- venn(rej_list2, ilcs=1.5, sncs=1.5)
+venn_diagram <- venn(rej_list2)
 ```
 
 ### Histogram of (causal) subgroups 
 ```{r Histogram_subgoups }
-library("RColorBrewer")
-
-
 calc_proportion_subgroup <- function(rej_vect){
   # Allows to compute the proportion of causal SNPs in each subgroup
   rares1 <- length(which((covariates[rej_vect]<0.05)==T))
@@ -141,7 +141,9 @@ subgroup_hist <- ggplot(data=prop_subgroup_tab, aes(x=Procedure, y=Proportion, f
   geom_bar(stat="identity") + 
   scale_fill_brewer(palette="Blues") +
   labs(y="Proportion of rejected SNPs") +
-  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
+  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), 
+        panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), 
+        panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
 
 subgroup_hist
 ```
