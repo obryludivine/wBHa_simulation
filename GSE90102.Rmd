@@ -9,12 +9,13 @@ output:
 # GSE90102 tutorial
 
 The data set comes from a study that aims to detect new potential genetic variants that influence Crohn's disease 
-[(Liu TC, et al. LRRK2 but not ATG16L1 is associated with Paneth cell defect in Japanese Crohn's disease patients. JCI Insight. 2017 ;2(6):e91917.)](https://insight.jci.org/articles/view/91917). The data, available on the Gene Expression Omnibus (GEO) database, contained 659,636 SNPs and 98 individuals [GSE90102](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE90102). 
+[(Liu TC, et al. LRRK2 but not ATG16L1 is associated with Paneth cell defect in Japanese Crohn's disease patients. *JCI Insight* . 2017 ;2(6):e91917.)](https://insight.jci.org/articles/view/91917). The data, available on the Gene Expression Omnibus (GEO) database, contained 659,636 SNPs and 98 individuals [GSE90102](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE90102). 
 
 
-As a part of Quality Control (QC) measures, only SNPs located on the autosome chromosomes were kept (13,793  SNPs were omitted). Next, 20,983 SNPs with call rate less than 95% and samples with genotyping rates less than 95% were excluded from analysis. Then, 1,330 SNPs with Hardy-Weinberg equilibrium pvalue less than $1 \times 10^{–5}$ were eliminated. At last, 15,810 SNPs with minor allele frequency less than 0.10 were ejected. After all exclusion, 98 Japanese individuals including and 607,720 SNPs were analyzed for GWAS, in which we tested the association between the percentage of Paneth cell defect (quantitative phenotype) and genotype using a linear regression model. After processing the data, we obtained a similar matrix to presented in the article by Liu TC, et al (2017) except for imputed SNPs.
+As a part of Quality Control (QC) measures, only SNPs located on the autosome chromosomes were kept (13,793  SNPs were omitted). Next, 20,983 SNPs with call rate less than 95% and samples with genotyping rates less than 95% were excluded from analysis. Then, 1,330 SNPs with Hardy-Weinberg equilibrium pvalue less than $1 \times 10^{–5}$ were eliminated. At last, 15,810 SNPs with minor allele frequency less than 0.10 were ejected. After all exclusion, 98 Japanese individuals including and 607,720 SNPs were analyzed for GWAS, in which we tested the association between the percentage of Paneth cell defect (quantitative phenotype) and genotype using a linear regression model. After processing the data, we obtained a similar matrix to presented in the article by Liu et al (2017) except for imputed SNPs.
 
 ## Application of procedures
+
 
 ```{r, echo=FALSE,include=FALSE}
 set.seed(123)
@@ -109,6 +110,9 @@ UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP"
                       nsets=8)
 UpsetR_graph
 ```
+
+We note that BH, qvalue and swfdr procedures reject the same variants : reduction of the number of procedure.
+
 
 ### Venn diagram
 ```{r,echo=FALSE,include=FALSE}
