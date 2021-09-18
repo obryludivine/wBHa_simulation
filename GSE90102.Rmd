@@ -105,10 +105,14 @@ UpsetR_graph
 ```
 
 ### Venn diagram
-```{r Venn, fig.align='center'}
+```{r,echo=FALSE,include=FALSE}
 # reduction of the number of groups: 8 to 6
 rej_list$qvalue==rej_list$BH
 rej_list$swfdr==rej_list$BH
+```
+
+
+```{r Venn, fig.align='center'}
 rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
 venn_diagram <- venn(rej_list2)
 ```
