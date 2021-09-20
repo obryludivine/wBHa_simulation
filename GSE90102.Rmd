@@ -82,8 +82,8 @@ rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, qvalue=rej_
 ```
 
 ## Graphs
-
-### Histogram of rejects
+### Overall power
+#### Histogram of rejects
 ```{r Histogram_rejects, fig.align='center'}
 rej_tab <- data.frame(Procedure=c("BH", "wBH", "wBHa", "IHW", "qvalue", "swfdr", "FDRreg", "CAMT"), 
                       Power=unlist(lapply(rej_list, length)))
@@ -98,33 +98,27 @@ rej_histogram <- ggplot(data=rej_tab, aes(x=Procedure, y=Power, fill=Procedure))
 rej_histogram
 ```
 
-### UpsetR graph
+#### UpsetR graph
 ```{r UpsetR, fig.align='center'}
 UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP", sets.x.label="Nb of rejections", 
                       nsets=8)
 UpsetR_graph
 ```
 
-We note that BH, qvalue and swfdr procedures reject the same variants : reduction of the number of procedure.
+We note that BH, qvalue and swfdr procedures reject the same variants : reduction of the number of procedure. We also notice that the BH, qvalue and swfdr procedures reject the same variants $\Rightarrow$ reduction of the number of procedures. Moreover, we note that the FDRreg procedure rejects a similar number of markers as the BH, qvalue and swfdr procedures. 
 
-We notice that the BH, qvalue and swfdr procedures reject the same variants $\Rightarrow$ reduction of the number of procedures. Moreover, we note that the FDRreg procedure rejects a similar number of markers as the BH, qvalue and swfdr procedures. 
-
-
-### Venn diagram
-```{r,echo=FALSE,include=FALSE}
+```{r, echo=T, results='hide'}
 # reduction of the number of groups: 8 to 6
 rej_list$qvalue==rej_list$BH
 rej_list$swfdr==rej_list$BH
-```
-
-
-```{r Venn, fig.align='center'}
 rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
-venn_diagram <- venn(rej_list2)
 ```
-This diagram shows that a large number of the rejected SNPs by the wBHa procedure are specific to it.
 
-### Histogram of (causal) subgroups 
+
+### Power of (causal) subgroups
+
+#### Histogram of rejects
+
 ```{r Histogram_subgoups, fig.align='center'}
 calc_proportion_subgroup <- function(rej_vect){
   # Allows to compute the proportion of causal SNPs in each subgroup
@@ -160,7 +154,7 @@ subgroup_hist
 ```
 We can note that wBHa focuses on rare markers (less than 5%). However, although this is also the case for the other weighted procedures combining the two types of approaches, these are less powerful for rare variants than wBHa.
 
-## Relationship to annotations 
+#### Relationship to annotations 
 
 SNPs found in the article present in our data and their respective coordinates: 
 
@@ -186,5 +180,8 @@ lapply(list(BH=pval_BH,CAMT=pval_CAMT,FDRreg=pval_FDRreg,IHW=pval_IHW,qvalue=pva
 ```
 
 
-
-
+### Venn diagram
+```{r Venn, fig.align='center'}
+venn_diagram <- venn(rej_list2)
+```
+This diagram shows that a large number of the rejected SNPs by the wBHa procedure are specific to it.
