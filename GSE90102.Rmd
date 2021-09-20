@@ -13,9 +13,7 @@ This vignette describes how to use the wBHa and other procedures on a GWAS datas
 As a part of Quality Control (QC) measures, only SNPs located on the autosome chromosomes were kept (13,793  SNPs were omitted). Next, 20,983 SNPs with call rate less than 95% and samples with genotyping rates less than 95% were excluded from analysis. Then, 1,330 SNPs with Hardy-Weinberg equilibrium p-value less than $1 \times 10^{–5}$ were eliminated. At last, 15,810 SNPs with minor allele frequency less than 0.10 were ejected. After all exclusion, 98 Japanese individuals including and 607,720 SNPs were analyzed for GWAS, in which we tested the association between the percentage of Paneth cell defect (quantitative phenotype) and genotype using a linear regression model. The p-values (GSE90102_01\$rawp) and Minor Allele Frequencies (GSE90102_01\$MAF) of the SNPs from this association test are available in the wBHa package (GSE90102_01).
 
 ## Loading of used libraries
-```{r, echo=T, results='hide'}
-
-
+```{r, message=FALSE}
 set.seed(123)
 library(IHW)
 library(qvalue)
@@ -109,6 +107,8 @@ UpsetR_graph
 
 We note that BH, qvalue and swfdr procedures reject the same variants : reduction of the number of procedure.
 
+We notice that the BH, qvalue and swfdr procedures reject the same variants $\Rightarrow$ reduction of the number of procedures. Moreover, we note that the FDRreg procedure rejects a similar number of markers as the BH, qvalue and swfdr procedures. 
+
 
 ### Venn diagram
 ```{r,echo=FALSE,include=FALSE}
@@ -122,6 +122,7 @@ rej_list$swfdr==rej_list$BH
 rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
 venn_diagram <- venn(rej_list2)
 ```
+This diagram shows that a large number of the rejected SNPs by the wBHa procedure are specific to it.
 
 ### Histogram of (causal) subgroups 
 ```{r Histogram_subgoups, fig.align='center'}
@@ -157,7 +158,7 @@ subgroup_hist <- ggplot(data=prop_subgroup_tab, aes(x=Procedure, y=Proportion, f
 
 subgroup_hist
 ```
-
+We can note that wBHa focuses on rare markers (less than 5%). However, although this is also the case for the other weighted procedures combining the two types of approaches, these are less powerful for rare variants than wBHa.
 
 ## Relationship to annotations 
 
