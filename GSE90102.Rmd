@@ -13,7 +13,9 @@ This vignette describes how to use the wBHa and other procedures on a GWAS datas
 As a part of Quality Control (QC) measures, only SNPs located on the autosome chromosomes were kept (13,793  SNPs were omitted). Next, 20,983 SNPs with call rate less than 95% and samples with genotyping rates less than 95% were excluded from analysis. Then, 1,330 SNPs with Hardy-Weinberg equilibrium p-value less than $1 \times 10^{–5}$ were eliminated. At last, 15,810 SNPs with minor allele frequency less than 0.10 were ejected. After all exclusion, 98 Japanese individuals including and 607,720 SNPs were analyzed for GWAS, in which we tested the association between the percentage of Paneth cell defect (quantitative phenotype) and genotype using a linear regression model. The p-values (GSE90102_01\$rawp) and Minor Allele Frequencies (GSE90102_01\$MAF) of the SNPs from this association test are available in the wBHa package (GSE90102_01).
 
 ## Loading of used libraries
-```{r, include=FALSE}
+```{r, echo=T, results='hide'}
+
+
 set.seed(123)
 library(IHW)
 library(qvalue)
@@ -27,8 +29,6 @@ library(RColorBrewer)
 ```
 
 ## Application of procedures 
-
-Firstly, we apply the 8 procedures on the p-values (and covariates).
 ```{r Application, fig.align='center'}
 data("GSE90102_01") # load the dataset from the wBHa package
 
