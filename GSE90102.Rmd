@@ -8,18 +8,13 @@ output:
 
 # GSE90102 tutorial
 
-The data set comes from a study that aims to detect new potential genetic variants that influence Crohn's disease 
-[(Liu TC, et al. LRRK2 but not ATG16L1 is associated with Paneth cell defect in Japanese Crohn's disease patients. *JCI Insight* . 2017 ;2(6):e91917.)](https://insight.jci.org/articles/view/91917). The data, available on the Gene Expression Omnibus (GEO) database, contained 659,636 SNPs and 98 individuals [GSE90102](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE90102). 
+This vignette describes how to use the wBHa and other procedures on a GWAS dataset, and performs analysis of the results obtained. The files this script works with are pulled from the [Gene Expression Omnibus (GEO) webpage](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE90102) and contain 659,636 SNPs and 98 individuals. 
 
+As a part of Quality Control (QC) measures, only SNPs located on the autosome chromosomes were kept (13,793  SNPs were omitted). Next, 20,983 SNPs with call rate less than 95% and samples with genotyping rates less than 95% were excluded from analysis. Then, 1,330 SNPs with Hardy-Weinberg equilibrium p-value less than $1 \times 10^{–5}$ were eliminated. At last, 15,810 SNPs with minor allele frequency less than 0.10 were ejected. After all exclusion, 98 Japanese individuals including and 607,720 SNPs were analyzed for GWAS, in which we tested the association between the percentage of Paneth cell defect (quantitative phenotype) and genotype using a linear regression model. The p-values (GSE90102_01\$rawp) and Minor Allele Frequencies (GSE90102_01\$MAF) of the SNPs from this association test are available in the wBHa package (GSE90102_01).
 
-As a part of Quality Control (QC) measures, only SNPs located on the autosome chromosomes were kept (13,793  SNPs were omitted). Next, 20,983 SNPs with call rate less than 95% and samples with genotyping rates less than 95% were excluded from analysis. Then, 1,330 SNPs with Hardy-Weinberg equilibrium pvalue less than $1 \times 10^{–5}$ were eliminated. At last, 15,810 SNPs with minor allele frequency less than 0.10 were ejected. After all exclusion, 98 Japanese individuals including and 607,720 SNPs were analyzed for GWAS, in which we tested the association between the percentage of Paneth cell defect (quantitative phenotype) and genotype using a linear regression model. After processing the data, we obtained a similar matrix to presented in the article by Liu et al (2017) except for imputed SNPs.
-
-## Application of procedures
-
-
-```{r, echo=FALSE,include=FALSE}
+## Loading of used libraries
+```{r, include=FALSE}
 set.seed(123)
-# Packages
 library(IHW)
 library(qvalue)
 library(swfdr)
@@ -31,21 +26,22 @@ library(venn)
 library(RColorBrewer)
 ```
 
+## Application of procedures 
 
+Firstly, we apply the 8 procedures on the p-values (and covariates).
 ```{r Application, fig.align='center'}
-data("GSE90102_01")
+data("GSE90102_01") # load the dataset from the wBHa package
 
-# Parameters
-alpha <- 0.05
-nfolds <- 60
-pvalues <- GSE90102_01$rawp
-covariates <- GSE90102_01$MAF
+# Initialization of parameters
+alpha <- 0.05 # alpha significance level set at 5%
+pvalues <- GSE90102_01$rawp # extraction of the p-values
+covariates <- GSE90102_01$MAF # extraction of the covariates
 
 
 # wBHa procedure
-res_wBHa <- wBHa(pvalues, covariates, alpha)
-pval_wBHa <- res_wBHa$adjusted_pvalues
-rej_wBHa <- which(pval_wBHa<=alpha)
+res_wBHa <- wBHa(pvalues, covariates, alpha) # use of the wBHa method 
+pval_wBHa <- res_wBHa$adjusted_pvalues # saving of adjusted p-values
+rej_wBHa <- which(pval_wBHa<=alpha) # saving the rejected SNPs
 
 
 # BH procedure 
@@ -58,21 +54,21 @@ pval_IHW <- adj_pvalues(res_IHW)
 rej_IHW <- which(pval_IHW<alpha)
 
 # wBH procedure
-pval_wBH <- p.adjust(pvalues/((length(pvalues)/sum(1/covariates))*(1/covariates)), method="BH")
+pval_wBH <- p.adjust(pvalues/((length(pvalues)/sum(1/covariates))*(1/covariates)), method="BH") 
 rej_wBH <- which(pval_wBH<=alpha)
 
 # Qvalue procedure
-res_qvalue <- qvalue(pvalues)
+res_qvalue <- qvalue(pvalues) 
 pval_qvalue <- res_qvalue$qvalues
 rej_qvalue <- which(pval_qvalue<alpha)
 
 # Swfdr procedure
-res_qvalue <- lm_qvalue(pvalues, covariates)
+res_qvalue <- lm_qvalue(pvalues, covariates) 
 pval_swfdr <- res_qvalue$qvalue
 rej_swfdr <- which(pval_swfdr<alpha)
 
 # FDRreg procedure
-pvalues[pvalues==1]<-(1-10^-7)
+pvalues[pvalues==1]<-(1-10^-7) 
 zscores <- qnorm(pvalues)
 res_FDRreg <- FDRreg(zscores, as.matrix(covariates))
 pval_FDRreg <- res_FDRreg$FDR
@@ -84,7 +80,7 @@ pval_CAMT <- res_CAMT$fdr
 rej_CAMT <- which(c(pval_CAMT<alpha))
 
 rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, qvalue=rej_qvalue, swfdr=rej_swfdr, 
-                 FDRreg=rej_FDRreg, CAMT=rej_CAMT)
+                 FDRreg=rej_FDRreg, CAMT=rej_CAMT) # list of rejected SNPs for each procedure
 ```
 
 ## Graphs
