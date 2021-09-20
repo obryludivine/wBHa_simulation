@@ -2,8 +2,11 @@
 title: "GSE90102 tutorial"
 author: "Ludivine Obry"
 output:
-  md_document:
-    variant: markdown_github
+  github_document: default
+  html_document:
+    df_print: paged
+  htlm_document: default
+  pdf_document: default
 ---
 
 # GSE90102 tutorial
@@ -52,7 +55,8 @@ pval_IHW <- adj_pvalues(res_IHW)
 rej_IHW <- which(pval_IHW<alpha)
 
 # wBH procedure
-pval_wBH <- p.adjust(pvalues/((length(pvalues)/sum(1/covariates))*(1/covariates)), method="BH") 
+pval_wBH <- p.adjust(pvalues/((length(pvalues)/sum(1/covariates))*(1/covariates)),
+                     method="BH") 
 rej_wBH <- which(pval_wBH<=alpha)
 
 # Qvalue procedure
@@ -77,31 +81,38 @@ res_CAMT <- camt.fdr(pvals=pvalues,pi0.var=covariates)
 pval_CAMT <- res_CAMT$fdr
 rej_CAMT <- which(c(pval_CAMT<alpha))
 
-rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, qvalue=rej_qvalue, swfdr=rej_swfdr, 
-                 FDRreg=rej_FDRreg, CAMT=rej_CAMT) # list of rejected SNPs for each procedure
+rej_list <- list(BH=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, 
+                 qvalue=rej_qvalue, swfdr=rej_swfdr, FDRreg=rej_FDRreg, 
+                 CAMT=rej_CAMT) # list of rejected SNPs for each procedure
 ```
 
 ## Graphs
 ### Overall power
 #### Histogram of rejects
 ```{r Histogram_rejects, fig.align='center'}
-rej_tab <- data.frame(Procedure=c("BH", "wBH", "wBHa", "IHW", "qvalue", "swfdr", "FDRreg", "CAMT"), 
+rej_tab <- data.frame(Procedure=c("BH", "wBH", "wBHa", "IHW", "qvalue", "swfdr",
+                                  "FDRreg", "CAMT"), 
                       Power=unlist(lapply(rej_list, length)))
 
 rej_histogram <- ggplot(data=rej_tab, aes(x=Procedure, y=Power, fill=Procedure)) + 
   geom_bar(stat="identity") + 
-  scale_fill_manual(values=c("#A6CEE3","#1F78B4","#7570B3","#1B9E77","#DADAEB","#D9D9D9","#E69F00","#E31A1C")) + 
-  geom_text(aes(label=round(Power,digits=1)), position=position_stack(0.5), color="white", fontface=c("bold")) + 
-  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), 
-        panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), 
-        panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
+  scale_fill_manual(values=c("#A6CEE3","#1F78B4","#7570B3","#1B9E77","#DADAEB",
+                             "#D9D9D9","#E69F00","#E31A1C")) + 
+  geom_text(aes(label=round(Power,digits=1)), position=position_stack(0.5),
+            color="white", fontface=c("bold")) + 
+  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", 
+                                      size=0.5, linetype="solid"), 
+        panel.grid.major=element_line(size=0.5, linetype="solid", 
+                                      colour="white"), 
+        panel.grid.minor=element_line(size=0.25, linetype="solid", 
+                                      colour="white"))
 rej_histogram
 ```
 
 #### UpsetR graph
 ```{r UpsetR, fig.align='center'}
-UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP", sets.x.label="Nb of rejections", 
-                      nsets=8)
+UpsetR_graph <- upset(fromList(rej_list), order.by="freq", mainbar.y.label="SNP",
+                      sets.x.label="Nb of rejections", nsets=8)
 UpsetR_graph
 ```
 
@@ -111,7 +122,8 @@ We note that BH, qvalue and swfdr procedures reject the same variants : reductio
 # reduction of the number of groups: 8 to 6
 rej_list$qvalue==rej_list$BH
 rej_list$swfdr==rej_list$BH
-rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW, FDRreg=rej_FDRreg, CAMT=rej_CAMT)
+rej_list2 <- list(BH.qvalue.swfdr=rej_BH, wBH=rej_wBH, wBHa=rej_wBHa, IHW=rej_IHW,
+                  FDRreg=rej_FDRreg, CAMT=rej_CAMT)
 ```
 
 
@@ -132,23 +144,30 @@ calc_proportion_subgroup <- function(rej_vect){
   return(prop)
 }
 
-prop_subgroup_tab <- as.data.frame(cbind(c(rep("BH.qvalue.swfdr",5), rep("wBH",5), rep("wBHa",5), rep("IHW",5),
-                                           rep("FDRreg",5), rep("CAMT",5)),c("5.Rare (MAF<0.05)", 
-                                                                             "4.Rare (0.05<MAF<0.1)",
-                                                                             "3.Rare (0.1<MAF<0.15)", 
-                                                                             "2.Medium (0.15<MAF<0.3)", 
-                                                                             "1.Frequent (0.3<MAF)"), 
-                                         unlist(lapply(rej_list2,calc_proportion_subgroup))))
+prop_subgroup_tab <- as.data.frame(cbind(c(rep("BH.qvalue.swfdr",5), rep("wBH",5),
+                                           rep("wBHa",5), rep("IHW",5), 
+                                           rep("FDRreg",5), rep("CAMT",5)),
+                                         c("5.Rare (MAF<0.05)", 
+                                           "4.Rare (0.05<MAF<0.1)",
+                                           "3.Rare (0.1<MAF<0.15)", 
+                                           "2.Medium (0.15<MAF<0.3)", 
+                                           "1.Frequent (0.3<MAF)"),
+                                         unlist(lapply(rej_list2,
+                                                       calc_proportion_subgroup))))
 colnames(prop_subgroup_tab) <- c("Procedure", "Subgroups", "Proportion")
 prop_subgroup_tab$Proportion <- as.numeric(prop_subgroup_tab$Proportion)
 
-subgroup_hist <- ggplot(data=prop_subgroup_tab, aes(x=Procedure, y=Proportion, fill=Subgroups)) +
+subgroup_hist <- ggplot(data=prop_subgroup_tab, aes(x=Procedure, y=Proportion,
+                                                    fill=Subgroups)) +
   geom_bar(stat="identity") + 
   scale_fill_brewer(palette="Blues") +
   labs(y="Proportion of rejected SNPs") +
-  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", size=0.5, linetype="solid"), 
-        panel.grid.major=element_line(size=0.5, linetype="solid", colour="white"), 
-        panel.grid.minor=element_line(size=0.25, linetype="solid", colour="white"))
+  theme(panel.background=element_rect(fill="#F0F0F0", colour="#F0F0F0", 
+                                      size=0.5, linetype="solid"), 
+        panel.grid.major=element_line(size=0.5, linetype="solid", 
+                                      colour="white"), 
+        panel.grid.minor=element_line(size=0.25, linetype="solid", 
+                                      colour="white"))
 
 subgroup_hist
 ```
@@ -168,15 +187,15 @@ search_rank <- function(pval_vect,alpha=0.05){
   pval_rank_tab <- data.frame(rank=c(1:length(pval_vect)), pvalues=pval_vect)
   pval_rank_tab_order <- pval_rank_tab[order(pval_rank_tab$pvalues),]
   pval_rank_tab_order <- cbind(pval_rank_tab_order, c(1:length(pval_vect)))
-  pval_rank_tab_order_interest <- pval_rank_tab_order[c("565881", "325191", "561177"),] 
-  pval_rank_tab_order_interest <- data.frame(SNP=c("rs12494894", "rs72622838", "rs2238823"), 
+  pval_rank_tab_order_interest <- pval_rank_tab_order[c("565881","325191","561177"),] 
+  pval_rank_tab_order_interest <- data.frame(SNP=c("rs12494894","rs72622838","rs2238823"), 
                                              Rank=pval_rank_tab_order_interest[,3], 
                                              Threshold=length(which((pval_vect<alpha))))
   return(pval_rank_tab_order_interest)
 }
 
-lapply(list(BH=pval_BH,CAMT=pval_CAMT,FDRreg=pval_FDRreg,IHW=pval_IHW,qvalue=pval_qvalue,swfdr=pval_swfdr,
-            wBH=pval_wBH,wBHa=pval_wBHa), search_rank)
+lapply(list(BH=pval_BH,CAMT=pval_CAMT,FDRreg=pval_FDRreg,IHW=pval_IHW,qvalue=pval_qvalue,
+            swfdr=pval_swfdr, wBH=pval_wBH,wBHa=pval_wBHa), search_rank)
 ```
 
 
