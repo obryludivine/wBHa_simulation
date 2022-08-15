@@ -260,7 +260,7 @@ for (m1 in c(15,20,25,50,100,150)) {
   res_FDR_power <- data.frame(row.names=c("FDR", "Power"),
                               rbind( apply(all_FDP, 1, mean), apply(all_Power, 1, mean) ))
   colnames(res_FDR_power) <- c("BH","wBH","wBHa","IHW","qvalue","swfdr","fdrreg","CAMT")
-  res_subpower <- data.frame(row.names=c("BH_subpower", "wBH_subpower", "wBHa_subpower",
+  res_Subpower <- data.frame(row.names=c("BH_subpower", "wBH_subpower", "wBHa_subpower",
                                          "IHW_subpower","Qvalue_subpower","Swfdr_subpower",
                                          "FDRreg_subpower", "CAMT_subpower"),
                              rbind(apply(all_subpower[seq(1,(nb_iteration*8),8),], 2, mean),
@@ -272,6 +272,6 @@ for (m1 in c(15,20,25,50,100,150)) {
                                    apply(all_subpower[seq(7,(nb_iteration*8),8),], 2, mean),
                                    apply(all_subpower[seq(8,(nb_iteration*8),8),], 2, mean)
                              ))
-  save(res_FDR_power, res_subpower,
+  save(res_FDR_power, res_Subpower,
        file = paste(path_out,"SemiSimu_HIV_m1_",m1,"_threshold_",correlation_threshold,"_R2_",r2,".RData",sep=""))
 }
