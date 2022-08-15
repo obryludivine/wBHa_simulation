@@ -299,8 +299,8 @@ nb_iteration <- 2
 r2 <- 0.2 #coefficient of determination
 correlation_threshold <- 0.8 #coefficient correlation threshold
 alpha <- 0.05 #significance level
-path_in <- c("/media/lobry/Elements/TESTADELETE2/")
-path_out <- c("/media/lobry/Elements/testadelete/")
+path_in <- c("~/")
+path_out <- c("~/")
 
 
 for (Case in c("independent","correlation")) {

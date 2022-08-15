@@ -274,10 +274,10 @@ correlationsofSNPs<-function(List_Drawn_SNPs, CorrMatrix, Threshold){
 }
 
 #Parameters
-nb_iteration <- 1
+nb_iteration <- 2
 size_n <- 2000
 r2 <- 0.2 #coefficient of determination
-path_out <- c("/media/lobry/Elements/TESTADELETE/")
+path_out <- c("~/")
 
 #Main
 for (Case in c("independent","correlation")) {

@@ -12,7 +12,7 @@ library(wBHa)
 alpha <- 0.05
 r2 <- 0.8 #coefficient of determination
 correlation_threshold <- 0.8 #coefficient correlation threshold
-nb_iteration <- 2
+nb_iteration <- 500
 path_out <- ("~/")
 
 load(file="~/HIV_data/matgeno/matgeno6.RData")
@@ -141,7 +141,7 @@ mcor_transit[which(upper.tri(mcor_transit,T),arr.ind=TRUE)[,2:1]]<-c(mcor[which(
 
 #save.image("~/Need_for_SemiSimu2.RData")
 #load("~/Need_for_SemiSimu2.RData")
-for (m1 in c(15)) {#5,20,25,50,100,150
+for (m1 in c(15,20,25,50,100,150)) {
   #m1 is the number of causal variants
   m0 <- size_m-m1
   subset_m1_1 <- m1%/%3 ; limit_subset_m1_1<-(1+subset_m1_1-1) # Nb of hypotheses in subgroup 1 and cumulated sum
