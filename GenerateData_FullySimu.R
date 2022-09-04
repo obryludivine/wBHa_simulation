@@ -258,7 +258,7 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", Scenario
     
     ## Define the list of drawn correlated SNPs
     List_SNPs_Drawn_Correlated[[iteration]] <- lapply(draw,correlationsofSNPs,
-                                                      CorrMatrix=mcor, Threshold=(vrho))
+                                                      CorrMatrix=mcor, Threshold=(0.8))
     reg_covariates[[iteration]]<-covariates
     reg_pvalues[[iteration]]<-pvalues
     reg_draw[[iteration]]<-draw
