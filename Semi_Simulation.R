@@ -50,7 +50,7 @@ Corr_drawn_rej<-function(corr_drawn_list, rej_list){
   S <- sum((corr_drawn_list%in%rej_list))
   return(S)
 }
-power_FDR_calc_corr_simu <- function(reject_vector, SNPs_Drawn_Correlated, Matrix_correlation_all, SNPs_Dranwn_gp1, SNPs_Dranwn_gp2, SNPs_Dranwn_gp3, seuil_correlation){
+power_FDR_calc_corr_simu <- function(reject_vector, SNPs_Drawn_Correlated, Matrix_correlation_all, SNPs_Dranwn_gp1, SNPs_Dranwn_gp2, SNPs_Dranwn_gp3, SNPs_Dranwn_gp4, seuil_correlation){
   if(length(reject_vector)!=0){
     if(length(which(reject_vector%in%unlist(SNPs_Drawn_Correlated)))!=0){
       H0 <- reject_vector[-which(reject_vector%in%unlist(SNPs_Drawn_Correlated))]
@@ -85,14 +85,15 @@ power_FDR_calc_corr_simu <- function(reject_vector, SNPs_Drawn_Correlated, Matri
     
     Power_gp1 <- power_subgroup_calc_corr_simu(SNPs_Dranwn_gp1,reject_vector)
     Power_gp2 <- power_subgroup_calc_corr_simu(SNPs_Dranwn_gp2,reject_vector)
-    Power_gp3 <- power_subgroup_calc_corr_simu(SNPs_Dranwn_gp3,reject_vector) 
-    Power_subgroup<-c(Power_gp1, Power_gp2, Power_gp3)
+    Power_gp3 <- power_subgroup_calc_corr_simu(SNPs_Dranwn_gp3,reject_vector)
+    Power_gp4 <- power_subgroup_calc_corr_simu(SNPs_Dranwn_gp4,reject_vector) 
+    Power_subgroup<-c(Power_gp1, Power_gp2, Power_gp3, Power_gp4)
     Power_subgroup[is.na(Power_subgroup)]=0
     
   }else{
     FDP <- NA
     Power <- NA
-    Power_subgroup <- c(NA,NA,NA)
+    Power_subgroup <- c(NA,NA,NA,NA)
     
   }
   
@@ -120,6 +121,12 @@ rm_duplicates <- function(list_input){
   }
   return(list_input)
 }
+se_calc <- function(x){
+  # Allows to compute the standard error of the sample x
+  n <- sum(!is.na(x))
+  se <- sd(x)/sqrt(n)
+  return(se)
+}
 
 # Transposition :
 matgeno <- t(matgeno)
@@ -139,9 +146,10 @@ size_m <- dim(matrix_imp)[2]
 size_n <- dim(matrix_imp)[1]
 
 # Cutting of MAF
-SNPs_maf_gp1 <- which(maf>0.05&maf<0.15)
-SNPs_maf_gp2 <- which(maf>0.15&maf<0.30)
-SNPs_maf_gp3 <- which(maf>0.30&maf<0.50)
+SNPs_maf_gp1 <- which(maf>0.01&maf<=0.05)
+SNPs_maf_gp2 <- which(maf>0.05&maf<=0.15)
+SNPs_maf_gp3 <- which(maf>0.15&maf<=0.30)
+SNPs_maf_gp4 <- which(maf>0.30&maf<=0.50)
 
 
 coeff_imp <- pbapply(matrix_imp, 2, coeff_calc_pval_beta0_beta, phenotype=vpheno2)
@@ -155,25 +163,27 @@ mcor<-as.data.frame(abs(cor(matrix_imp,matrix_imp)))
 
 #save.image("~/Need_for_SemiSimu2.RData")
 #load("~/Need_for_SemiSimu2.RData")
-for (m1 in c(15,20,25,50,100,150)) {
+for (m1 in c(20,25,50,100,150)) {
   #m1 is the number of causal variants
   m0 <- size_m-m1
-  subset_m1_1 <- m1%/%3 ; limit_subset_m1_1<-(1+subset_m1_1-1) # Nb of hypotheses in subgroup 1 and cumulated sum
-  subset_m1_2 <- m1%/%3 ; limit_subset_m1_2<-(limit_subset_m1_1+subset_m1_2) # Nb of hypotheses in subgroup 2 and cumulated sum
-  subset_m1_3 <- (m1%%3)+(m1%/%3) ; limit_subset_m1_3<-(limit_subset_m1_2+subset_m1_3) # Nb of hypotheses in subgroup 3 and cumulated sum
+  subset_m1_1 <- m1%/%4; limit_subset_m1_1<-(subset_m1_1) # Nb of hypotheses in subgroup 1 and cumulated sum
+  subset_m1_2 <- m1%/%4 ; limit_subset_m1_2<-(limit_subset_m1_1+subset_m1_2) # Nb of hypotheses in subgroup 2 and cumulated sum
+  subset_m1_3 <- m1%/%4 ; limit_subset_m1_3<-(limit_subset_m1_2+subset_m1_3) # Nb of hypotheses in subgroup 3 and cumulated sum
+  subset_m1_4 <- (m1%%4)+(m1%/%4) ; limit_subset_m1_4<-(limit_subset_m1_3+subset_m1_4) # Nb of hypotheses in subgroup 4 and cumulated sum
   
   # Draw for causal variants
-  draw1<-sample(SNPs_maf_gp1,m1%/%3)
-  draw2<-sample(SNPs_maf_gp2,m1%/%3)
-  draw3<-sample(SNPs_maf_gp3,m1-2*(m1%/%3))
-  draw<-c(draw1,draw2,draw3)
+  draw1<-sample(SNPs_maf_gp1,m1%/%4)
+  draw2<-sample(SNPs_maf_gp2,m1%/%4)
+  draw3<-sample(SNPs_maf_gp3,m1%/%4)
+  draw4<-sample(SNPs_maf_gp4,m1-3*(m1%/%4))
+  draw<-c(draw1,draw2,draw3,draw4)
   
   # Dermination of bêta0 and bêta
   beta <- c(rep(0,size_m))
-  
-  beta[draw1]=quant_imp[4]
-  beta[draw2]=quant_imp[3]
-  beta[draw3]=quant_imp[2]
+  beta[draw1]=quant_imp[5]
+  beta[draw2]=quant_imp[4]
+  beta[draw3]=quant_imp[3]
+  beta[draw4]=quant_imp[2]
   
   beta <- as.matrix(unlist(beta))
   
@@ -199,6 +209,10 @@ for (m1 in c(15,20,25,50,100,150)) {
     lapply(List_SNPs_Drawn_Correlated,match,draw3),function(x){
       x[is.na(x)]<-0;return(sum(x))}))>0]
   draw3_bis=rm_duplicates(draw3_bis)
+  draw4_bis<-List_SNPs_Drawn_Correlated[unlist(lapply(
+    lapply(List_SNPs_Drawn_Correlated,match,draw4),function(x){
+      x[is.na(x)]<-0;return(sum(x))}))>0]
+  draw4_bis=rm_duplicates(draw4_bis)
   
   
   all_FDP<-c()
@@ -212,31 +226,31 @@ for (m1 in c(15,20,25,50,100,150)) {
     #BH procedure
     rejects_BH <- which(p.adjust(pvalues, method="BH")<=alpha)
     res_BH <- power_FDR_calc_corr_simu(rejects_BH,List_SNPs_Drawn_Correlated,mcor,
-                                       draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                       draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     #IHW procedure
     res_IHW <- ihw(pvalues~maf,alpha=alpha)
     rejects_IHW <- which(adj_pvalues(res_IHW)<0.05)
     res_IHW <- power_FDR_calc_corr_simu(rejects_IHW,List_SNPs_Drawn_Correlated,mcor,
-                                        draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                        draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     #wBH procedure
     rejects_wBH <- which(p.adjust(pvalues/((length(pvalues)/sum(1/maf))*(1/maf)), method = "BH")<=alpha)
     res_wBH <- power_FDR_calc_corr_simu(rejects_wBH,List_SNPs_Drawn_Correlated,mcor,
-                                        draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                        draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     # wBHa procedure
     res_wBHa <- wBHa(pvalues, maf, alpha)
     rejects_wBHa <- which(res_wBHa$adjusted_pvalues<alpha)
     res_wBHa <- power_FDR_calc_corr_simu(rejects_wBHa,List_SNPs_Drawn_Correlated,mcor,
-                                         draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                         draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     # Qvalue procedure
     res_qvalue <- qvalue(pvalues)
     rejects_qvalue <- which(res_qvalue$qvalues<alpha)
     res_qvalue <- power_FDR_calc_corr_simu(rejects_qvalue, List_SNPs_Drawn_Correlated,mcor,
-                                           draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                           draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     # Swfdr procedure
     res_lm_qvalue <- lm_qvalue(pvalues, maf)
     reject_swfdr <- which(res_lm_qvalue$qvalue<alpha)
     res_swfdr <- power_FDR_calc_corr_simu(reject_swfdr,List_SNPs_Drawn_Correlated,mcor,
-                                          draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                          draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     # FDRreg procedure
     pvalues2 <- pvalues
     pvalues2[pvalues2==1]<-(1-10^-7)
@@ -244,12 +258,12 @@ for (m1 in c(15,20,25,50,100,150)) {
     res_fdrreg <- FDRreg(zscores, as.matrix(maf))
     rejects_fdrreg <- which(res_fdrreg$FDR<alpha)
     res_fdrreg <- power_FDR_calc_corr_simu(rejects_fdrreg, List_SNPs_Drawn_Correlated,mcor,
-                                           draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                           draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     # CAMT procedure
     res_camt <- camt.fdr(pvals=pvalues,pi0.var=maf)
     reject_camt <- which(c(res_camt$fdr<alpha))
     res_camt <- power_FDR_calc_corr_simu(reject_camt, List_SNPs_Drawn_Correlated,mcor,
-                                         draw1_bis,draw2_bis,draw3_bis,correlation_threshold)
+                                         draw1_bis,draw2_bis,draw3_bis,draw4_bis,correlation_threshold)
     #Results
     # Results
     all_FDP <- cbind(all_FDP, rbind(res_BH[[1]], res_wBH[[1]], res_wBHa[[1]], res_IHW[[1]], res_qvalue[[1]], res_swfdr[[1]], res_fdrreg[[1]], res_camt[[1]]))
@@ -266,12 +280,12 @@ for (m1 in c(15,20,25,50,100,150)) {
   }
   
   # Final results editing
-  res_FDR_power <- data.frame(row.names=c("FDR", "Power"),
-                              rbind( apply(all_FDP, 1, mean), apply(all_Power, 1, mean) ))
+  res_FDR_power <- data.frame(row.names=c("FDR", "Power","se.FDR","se.Power"),
+                              rbind( apply(all_FDP, 1, mean), apply(all_Power, 1, mean),
+                                     apply(all_FDP,1, se_calc), apply(all_Power,1, se_calc)))
   colnames(res_FDR_power) <- c("BH","wBH","wBHa","IHW","qvalue","swfdr","fdrreg","CAMT")
   res_Subpower <- data.frame(row.names=c("BH_subpower", "wBH_subpower", "wBHa_subpower",
-                                         "IHW_subpower","Qvalue_subpower","Swfdr_subpower",
-                                         "FDRreg_subpower", "CAMT_subpower"),
+                                         "IHW_subpower","Qvalue_subpower","Swfdr_subpower","FDRreg_subpower", "CAMT_subpower"),
                              rbind(apply(all_subpower[seq(1,(nb_iteration*8),8),], 2, mean),
                                    apply(all_subpower[seq(2,(nb_iteration*8),8),], 2, mean),
                                    apply(all_subpower[seq(3,(nb_iteration*8),8),], 2, mean),
@@ -280,7 +294,16 @@ for (m1 in c(15,20,25,50,100,150)) {
                                    apply(all_subpower[seq(6,(nb_iteration*8),8),], 2, mean),
                                    apply(all_subpower[seq(7,(nb_iteration*8),8),], 2, mean),
                                    apply(all_subpower[seq(8,(nb_iteration*8),8),], 2, mean)
-                             ))
+                             ),
+                             rbind(apply(all_subpower[seq(1,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(2,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(3,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(4,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(5,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(6,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(7,(nb_iteration*8),8),], 2, se_calc),
+                                   apply(all_subpower[seq(8,(nb_iteration*8),8),], 2, se_calc))
+  )
   save(res_FDR_power, res_Subpower,
        file = paste(path_out,"SemiSimu_HIV_m1_",m1,"_threshold_",correlation_threshold,"_R2_",r2,".RData",sep=""))
 }

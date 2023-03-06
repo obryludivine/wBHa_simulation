@@ -42,21 +42,24 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
     # size_m: Nb of SNPs
     # m1: Nb of causal SNPs
     m0<-size_m-m1 #  m0: Nb of non causal SNPs
-    subset_m1_1<-m1%/%3 # Nb of hypotheses in subgroup 1
-    subset_m1_2<-m1%/%3 # Nb of hypotheses in subgroup 2
-    subset_m1_3<-(m1%%3)+(m1%/%3) # Nb of hypotheses in subgroup 3
+    subset_m1_1<-m1%/%4 # # Nb of hypotheses in subgroup 1
+    subset_m1_2<-m1%/%4 # Nb of hypotheses in subgroup 2
+    subset_m1_3<-m1%/%4 # Nb of hypotheses in subgroup 3
+    subset_m1_4<-(m1%%4)+(m1%/%4) # Nb of hypotheses in subgroup 4
     ## Regarding covariables
-    theoretical_maf_m0 <- runif(m0, 0.05, 0.5)
-    theoretical_maf_subset_m1_1 <- runif(subset_m1_1,0.05,0.15)
-    theoretical_maf_subset_m1_2 <- runif(subset_m1_2,0.15,0.25)
-    theoretical_maf_subset_m1_3 <- runif(subset_m1_3,0.3,0.4)
+    theoretical_maf_m0 <- runif(m0, 0.01, 0.5)
+    theoretical_maf_subset_m1_1 <- runif(subset_m1_1,0.01,0.05)
+    theoretical_maf_subset_m1_2 <- runif(subset_m1_2,0.05,0.15)
+    theoretical_maf_subset_m1_3 <- runif(subset_m1_3,0.15,0.25)
+    theoretical_maf_subset_m1_4 <- runif(subset_m1_4,0.3,0.4)
     
     ## Regarding genotypes
     geno_matrix_m0 <- apply(as.matrix(theoretical_maf_m0), 1, geno_calc,NbInd=size_n)
-    geno_matrix_subset_m1_1 <- apply(as.matrix(theoretical_maf_subset_m1_1), 1, geno_calc,NbInd=size_n)
+    geno_matrix_subset_m1_1 <- apply(as.matrix(theoretical_maf_subset_m1_1), 1, geno_calc,NbInd=size_n) 
     geno_matrix_subset_m1_2 <- apply(as.matrix(theoretical_maf_subset_m1_2), 1, geno_calc,NbInd=size_n)
     geno_matrix_subset_m1_3 <- apply(as.matrix(theoretical_maf_subset_m1_3), 1, geno_calc,NbInd=size_n)
-    matrix_X <- cbind(geno_matrix_subset_m1_1,geno_matrix_subset_m1_2,geno_matrix_subset_m1_3,geno_matrix_m0)
+    geno_matrix_subset_m1_4 <- apply(as.matrix(theoretical_maf_subset_m1_4), 1, geno_calc,NbInd=size_n)
+    matrix_X <- cbind(geno_matrix_subset_m1_1,geno_matrix_subset_m1_2, geno_matrix_subset_m1_3,geno_matrix_subset_m1_4,  geno_matrix_m0)
     
     covariates <- apply(matrix_X, 2, maf_calc) # Computation of the estimated MAF = covariates
     
@@ -65,13 +68,13 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
       R2<-r2 # Percentage explaining the model coefficient of determination
       ### Beta building
       if(ScenarioBeta=="reference"){
-        beta <- as.matrix(c(rep(3,subset_m1_1),rep(2,subset_m1_2),rep(1,subset_m1_3), rep(0,m0)))
+        beta <- as.matrix(c(rep(4,subset_m1_1),rep(3,subset_m1_2),rep(2,subset_m1_3),rep(1,subset_m1_4), rep(0,m0))) 
       }
       if(ScenarioBeta=="inverse"){
-        beta <- as.matrix(c(rep(1,subset_m1_1),rep(2,subset_m1_2),rep(3,subset_m1_3), rep(0,m0)))
+        beta <- as.matrix(c(rep(1,subset_m1_1),rep(2,subset_m1_2),rep(3,subset_m1_3),rep(4,subset_m1_4), rep(0,m0)))
       }
       if(ScenarioBeta=="constant"){
-        beta <- as.matrix(c(rep(2,subset_m1_1),rep(2,subset_m1_2),rep(2,subset_m1_3), rep(0,m0)))
+        beta <- as.matrix(c(rep(2,subset_m1_1),rep(2,subset_m1_2),rep(2,subset_m1_3),rep(2,subset_m1_4), rep(0,m0)))
       }
       
       ### Regarding p-values
@@ -83,13 +86,13 @@ generate_ind_data <- function(nb_iteration=500, Design="quantitative",ScenarioBe
     } else if(Design=="case_control"){ # If case_control design
       ### Beta building
       if(ScenarioBeta=="reference"){
-        beta <- as.matrix(c(rep(log(1.8),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.3),subset_m1_3), rep(log(1),m0)))
+        beta <- as.matrix(c(rep(log(2.2),subset_m1_1),rep(log(1.8),subset_m1_2),rep(log(1.5),subset_m1_3),rep(log(1.3),subset_m1_4), rep(log(1),m0)))
       }
       if(ScenarioBeta=="inverse"){
-        beta <- as.matrix(c(rep(log(1.3),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.8),subset_m1_3), rep(log(1),m0)))
+        beta <- as.matrix(c(rep(log(1.3),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.8),subset_m1_3),rep(log(2.2),subset_m1_4), rep(log(1),m0)))
       }
       if(ScenarioBeta=="constant"){
-        beta <- as.matrix(c(rep(log(1.5),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.5),subset_m1_3), rep(log(1),m0)))
+        beta <- as.matrix(c(rep(log(1.5),subset_m1_1),rep(log(1.5),subset_m1_2),rep(log(1.5),subset_m1_3),rep(log(1.5),subset_m1_4), rep(log(1),m0)))
       }
       
       ### Choice of bêta0
@@ -152,18 +155,21 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", Scenario
   vsigma <- as.matrix(bdiag(mylist))
   
   m0<-size_m-m1 #  m0: Nb of non causal SNPs
-  subset_m1_1<-m1%/%3 # Nb of hypotheses in subgroup 1
-  subset_m1_2<-m1%/%3 # Nb of hypotheses in subgroup 2
-  subset_m1_3<-(m1%%3)+(m1%/%3) # Nb of hypotheses in subgroup 3
+  subset_m1_1<-m1%/%4 # Nb of hypotheses in subgroup 1
+  subset_m1_2<-m1%/%4 # Nb of hypotheses in subgroup 2
+  subset_m1_3<-m1%/%4 # Nb of hypotheses in subgroup 3
+  subset_m1_4<-(m1%%4)+(m1%/%4) # Nb of hypotheses in subgroup 4
   
   ## Regarding covariables
-  theoretical_maf_m0 <- runif(m0, 0.05, 0.5)
-  theoretical_maf_subset_m1_1 <- runif(subset_m1_1,0.05,0.15)
-  theoretical_maf_subset_m1_2 <- runif(subset_m1_2,0.15,0.25)
-  theoretical_maf_subset_m1_3 <- runif(subset_m1_3,0.3,0.4)
+  theoretical_maf_m0 <- runif(m0, 0.01, 0.5)
+  theoretical_maf_subset_m1_1 <- runif(subset_m1_1,0.01,0.05)
+  theoretical_maf_subset_m1_2 <- runif(subset_m1_2,0.05,0.15)
+  theoretical_maf_subset_m1_3 <- runif(subset_m1_3,0.15,0.25)
+  theoretical_maf_subset_m1_4 <- runif(subset_m1_4,0.3,0.4)
   total_theoretical_maf <- c(theoretical_maf_subset_m1_1,
                              theoretical_maf_subset_m1_2,
                              theoretical_maf_subset_m1_3,
+                             theoretical_maf_subset_m1_4,
                              theoretical_maf_m0)
   
   mat1<-rmvnorm(size_n,mean=rep(0,size_m/4),sigma = vsigma[1:2000,1:2000])
@@ -182,9 +188,10 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", Scenario
   covariates <- apply(matrix_X, 2, maf_calc) # Computation of the estimated MAF = covariates
   
   # Cutting the MAF into subgroups
-  SNPs_maf_subgp_m1_1 <- which(covariates>0.05&covariates<0.15)
-  SNPs_maf_subgp_m1_2 <- which(covariates>0.15&covariates<0.25)
-  SNPs_maf_subgp_m1_3 <- which(covariates>0.30&covariates<0.50)
+  SNPs_maf_subgp_m1_1 <- which(covariates>0.01&covariates<0.05)
+  SNPs_maf_subgp_m1_2 <- which(covariates>0.05&covariates<0.15)
+  SNPs_maf_subgp_m1_3 <- which(covariates>0.15&covariates<0.25)
+  SNPs_maf_subgp_m1_4 <- which(covariates>0.30&covariates<0.50)
   
   # How to define the True Positives (TP) ?
   ## Define the correlation matrix
@@ -203,23 +210,24 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", Scenario
     beta <- c(rep(0,size_m))
     
     ## Draw among them
-    draw1<-sample(SNPs_maf_subgp_m1_1,m1%/%3)
-    draw2<-sample(SNPs_maf_subgp_m1_2,m1%/%3)
-    draw3<-sample(SNPs_maf_subgp_m1_3,m1-2*(m1%/%3))
-    draw<-c(draw1,draw2,draw3)
+    draw1<-sample(SNPs_maf_subgp_m1_1,m1%/%4)
+    draw2<-sample(SNPs_maf_subgp_m1_2,m1%/%4)
+    draw3<-sample(SNPs_maf_subgp_m1_3,m1%/%4)
+    draw4<-sample(SNPs_maf_subgp_m1_4,m1-3*(m1%/%4))
+    draw<-c(draw1,draw2,draw3,draw4)
     
     ## Regarding p-values
     if(Design=="quantitative"){ # If quantitative design
       r2 <- R2 # Percentage explaining the model (coefficient of determination)
       ### Beta building
       if(ScenarioBeta=="reference"){
-        beta[draw1] <- 3; beta[draw2] <- 2; beta[draw3] <- 1 # Beta for each group
+        beta[draw1] <- 4; beta[draw2] <- 3; beta[draw3] <- 2; beta[draw4] <- 1 # Beta for each group
       }
       if(ScenarioBeta=="inverse"){
-        beta[draw1] <- 1; beta[draw2] <- 2; beta[draw3] <- 3 # Beta for each group
+        beta[draw1] <- 1; beta[draw2] <- 2; beta[draw3] <- 3; beta[draw4] <- 4 # Beta for each group
       }
       if(ScenarioBeta=="constant"){
-        beta[draw1] <- 2; beta[draw2] <- 2; beta[draw3] <- 2 # Beta for each group
+        beta[draw1] <- 2; beta[draw2] <- 2; beta[draw3] <- 2; beta[draw4] <- 2 # Beta for each group
       }
       beta <- as.matrix(unlist(beta)) # Final Beta vector
       ### Regarding p-values
@@ -231,13 +239,13 @@ generate_corr_data <- function(nb_iteration=500, Design="quantitative", Scenario
     } else if(Design=="case_control"){ # If case_control design
       ### Beta building
       if(ScenarioBeta=="reference"){
-        beta[draw1] <- log(1.8); beta[draw2] <- log(1.5); beta[draw3] <- log(1.3) # Beta for each group
+        beta[draw1] <- log(2.2); beta[draw2] <- log(1.8); beta[draw3] <- log(1.5); beta[draw4] <- log(1.3) # Beta for each group
       }
       if(ScenarioBeta=="inverse"){
-        beta[draw1] <- log(1.3); beta[draw2] <- log(1.5); beta[draw3] <- log(1.8) # Beta for each group
+        beta[draw1] <- log(1.3); beta[draw2] <- log(1.5); beta[draw3] <- log(1.8); beta[draw4] <- log(2.2) # Beta for each group
       }
       if(ScenarioBeta=="constant"){
-        beta[draw1] <- log(1.5); beta[draw2] <- log(1.5); beta[draw3] <- log(1.5) # Beta for each group
+        beta[draw1] <- log(1.5); beta[draw2] <- log(1.5); beta[draw3] <- log(1.5); beta[draw4] <- log(1.5) # Beta for each group
       }
       beta <- as.matrix(unlist(beta)) # Final Beta vector
       ### Choice of bêta0
@@ -286,16 +294,16 @@ for (Case in c("independent","correlation")) {
     blsize <- 0 #bloc size
     for (scenario in c("reference","inverse","constant")) {
       if(scenario=="reference"){ #corresponding to scenario 1
-        binary_beta=c("B_1.8_1.5_1.3_1.rda")
-        quantitative_beta=c("B3210.rda")
+        binary_beta=c("B_2.2_1.8_1.5_1.3_1.rda")
+        quantitative_beta=c("B43210.rda")
       }
       if(scenario=="inverse"){ #corresponding to scenario 2
-        binary_beta=c("B_1.3_1.5_1.8_1.rda")
-        quantitative_beta=c("B1230.rda")
+        binary_beta=c("B_1.3_1.5_1.8_2.2_1.rda")
+        quantitative_beta=c("B12340.rda")
       }
       if(scenario=="constant"){ #corresponding to scenario 3
-        binary_beta=c("B_1.5_1.5_1.5_1.rda")
-        quantitative_beta=c("B2220.rda")
+        binary_beta=c("B_1.5_1.5_1.5_1.5_1.rda")
+        quantitative_beta=c("B22220.rda")
       }
       for (design in c("quantitative","case_control")) {
         for (size_m in c(8000,14000,20000)) {
@@ -322,16 +330,16 @@ for (Case in c("independent","correlation")) {
     blsize <- 10 #bloc size
     for (scenario in c("reference","inverse","constant")) {
       if(scenario=="reference"){ #corresponding to scenario 1
-        binary_beta=c("B_1.8_1.5_1.3_1.rda")
-        quantitative_beta=c("B3210.rda")
+        binary_beta=c("B_2.2_1.8_1.5_1.3_1.rda")
+        quantitative_beta=c("B43210.rda")
       }
       if(scenario=="inverse"){ #corresponding to scenario 2
-        binary_beta=c("B_1.3_1.5_1.8_1.rda")
-        quantitative_beta=c("B1230.rda")
+        binary_beta=c("B_1.3_1.5_1.8_2.2_1.rda")
+        quantitative_beta=c("B12340.rda")
       }
       if(scenario=="constant"){ #corresponding to scenario 3
-        binary_beta=c("B_1.5_1.5_1.5_1.rda")
-        quantitative_beta=c("B2220.rda")
+        binary_beta=c("B_1.5_1.5_1.5_1.5_1.rda")
+        quantitative_beta=c("B22220.rda")
       }
       for (design in c("case_control","quantitative")) {
         for(m1 in c(5,10,15,20,25,50,100,150)){
